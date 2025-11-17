@@ -13,15 +13,15 @@ function loadStartingScreen(){
     pocCtx.textAlign="center";
     pocCtx.fillText("Press SPACE to begin", 600, 360);
     document.body.insertBefore(pocCanvas, document.body.childNodes[0]);
+    if(!localStorage.getItem('highestGame')){
+        localStorage.setItem('highestGame', 0);
+    }
     document.addEventListener("keypress", function (event) {
         if (event.code === 'Space') {
             document.body.removeChild(document.getElementById("pocCanvas"));
             startGame();
         }
     });
-    if(!localStorage.getItem('highestGame')){
-        localStorage.setItem('highestGame', 0);
-    }
 }
 
 var score = localStorage.getItem('highestGame');
