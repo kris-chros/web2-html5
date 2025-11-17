@@ -1,4 +1,4 @@
-function loadStartingScreen(){
+function loadStartingScreen(){ // funkcija koja stvara prvi canvas element i osluškuje pritisak razmaknice
     var pocCanvas = document.createElement("canvas");
     pocCanvas.id = "pocCanvas";
     pocCanvas.width = 1200;
@@ -13,10 +13,10 @@ function loadStartingScreen(){
     pocCtx.textAlign="center";
     pocCtx.fillText("Press SPACE to begin", 600, 360);
     document.body.insertBefore(pocCanvas, document.body.childNodes[0]);
-    if(!localStorage.getItem('highestGame')){
+    if(!localStorage.getItem('highestGame')){ // inicijalizacija najboljeg rezultata u local storage-u ako ne postoji
         localStorage.setItem('highestGame', 0);
     }
-    document.addEventListener("keypress", function (event) {
+    document.addEventListener("keypress", function (event) { // oslukškivač pritiska razmaknice
         if (event.code === 'Space') {
             document.body.removeChild(document.getElementById("pocCanvas"));
             startGame();
@@ -32,15 +32,15 @@ const pocBrzina = 2;
 const brojCigli = 50;
 const brojRedova = 5;
 const brojStupaca = 10;
-const boje = ["#993300", "#FF0000", "#FF99CC", "#00FF00", "#FFFF99"];
-let pozCigli = [];
+const boje = ["#993300", "#FF0000", "#FF99CC", "#00FF00", "#FFFF99"]; // polje s bojama cigli prema redovima
+let pozCigli = []; // polje s pozicijama cigli
 for (let n1 = 0; n1 < (brojCigli/brojStupaca); n1++){
     for (let n2 = 0; n2 < (brojCigli/brojRedova); n2++){
         pozCigli.push({x:(40+115*n2), y:(90+35*n1)});
     }
 }
 
-function startGame() {
+function startGame() { // funkcija s kojom igra zapocinje - stvara se loptica, palica i osluškivač za micanje palice
     myGamePiece = new loptica(20, 20, "#bfbfbfff", 580, 590);
     myGamePalica = new palica(100, 20, "#FFFFFF", 550, 620);
     document.addEventListener("keydown", function (event) {
@@ -54,19 +54,19 @@ function startGame() {
             myGamePalica.update();
         }
     });
-    myGameArea.start();
+    myGameArea.start(); // stvaranje glavnog canvas elementa
 }
 
-var myGameArea = {
+var myGameArea = { // varijabla za glavni ekran igrice
     canvas : document.createElement("canvas"),
-    start : function() {
+    start : function() { // funkcija inicijalizacije ekrana
         this.canvas.id = "myGameCanvas";
         this.canvas.width = 1200;
         this.canvas.height = 650;
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 
-        for (let j = 0; j < (brojCigli/brojStupaca); j++) {
+        for (let j = 0; j < (brojCigli/brojStupaca); j++) { // crtanje cigli
             this.context.shadowBlur = 20;
             this.context.shadowColor = "black";
             this.context.fillStyle = boje[j];
@@ -75,7 +75,7 @@ var myGameArea = {
             }
         }
 
-        this.context.font = "20px verdana";
+        this.context.font = "20px verdana"; // rezultati
         this.context.textAlign="left";
         this.context.textBaseline="top";
         this.context.fillStyle="#FFFFFF";
@@ -88,7 +88,7 @@ var myGameArea = {
         this.interval = setInterval(updateGameArea, 20);
         myGamePalica.update();
     },
-    stop : function() {
+    stop : function() { // funkcija za zaustavljanje igre u slucaju poraza ili pobjede
         clearInterval(this.interval);
         if (gameScore == 50){
             this.context.font = "bold 40px verdana";
@@ -107,7 +107,7 @@ var myGameArea = {
             localStorage.setItem('highestGame', gameScore);
         }
     },
-    clear : function() {
+    clear : function() { // funkcija koja omogućava kretanje elemenata brisanjem starih
         this.context.clearRect(myGamePiece.fetchX()-15, myGamePiece.fetchY()-15, 30, 30);
         this.context.clearRect(10, 10, 30, 50);
         this.context.clearRect(1090, 10, 30, 50);
@@ -122,7 +122,7 @@ var myGameArea = {
     }
 }
 
-function loptica(width, height, color, x, y, type) {
+function loptica(width, height, color, x, y, type) { // funckija kojom se definira loptica
     this.type = type;
     this.width = width;
     this.height = height;
@@ -134,13 +134,13 @@ function loptica(width, height, color, x, y, type) {
     this.speed_y = pocBrzina;
     this.x = x;
     this.y = y;
-    this.fetchX = function() {
+    this.fetchX = function() { // dohvat pozicije loptice
         return this.x;
     }
-    this.fetchY = function(){
+    this.fetchY = function(){ // dohvat pozicije loptice
         return this.y;
     }
-    this.update = function() {
+    this.update = function() { //azuriranje loptice
         ctx = myGameArea.context;
         ctx.save();
         ctx.translate(this.x, this.y);
@@ -150,19 +150,19 @@ function loptica(width, height, color, x, y, type) {
         ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
         ctx.restore();
     }
-    this.newPos = function() {
-        if (this.x - this.width / 2 < 0)
+    this.newPos = function() { //racunanje nove pozicije i promjene smjera
+        if (this.x - this.width / 2 < 0) // provjera kolizije s rubom ekrana
             this.speed_x = pocBrzina;
         else if ((this.x + this.width / 2) >= myGameArea.context.canvas.width)
             this.speed_x = -pocBrzina;
         if (this.y - this.height / 2 < 0)
             this.speed_y = -pocBrzina;
         else if ((this.y + this.height / 2) >= myGameArea.context.canvas.height)
-            myGameArea.stop();
+            myGameArea.stop(); // provjera je li loptica otišla van dozvoljenih granica
         if (((this.x + this.width) >= (myGamePalica.fetchX())) && ((this.x) <= (myGamePalica.fetchX() + 100)) && (this.y + this.height) >= (myGamePalica.fetchY()) && (this.y <= myGamePalica.fetchY() + 20)){
-            this.speed_y = pocBrzina;
+            this.speed_y = pocBrzina; // provjera kolizije s palicom
         }
-        for(let i = 0; i < pozCigli.length; i++){
+        for(let i = 0; i < pozCigli.length; i++){ // provjera kolzije s ciglama
             if (pozCigli[i].x < 0) continue;
             if (((this.y + this.height) >= pozCigli[i].y) && ((this.y) <= (pozCigli[i].y + 20)) && ((this.x + this.width) >= pozCigli[i].x) && ((this.x) <= pozCigli[i].x+100)){
                 let overlapLeft   = this.x + this.width - pozCigli[i].x;
@@ -170,28 +170,19 @@ function loptica(width, height, color, x, y, type) {
                 let overlapTop    = this.y + this.height - pozCigli[i].y;
                 let overlapBottom = pozCigli[i].y + 20 - this.y;
 
-                const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+                const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom); // zbog neprecizne pozicije loptice racuna se minimalna udaljenost
 
-                // Determine collision side by smallest penetration
                 if (minOverlap == overlapLeft) {
-                    // Hit from left
                     this.speed_x = -this.speed_x *1.2;
-                    //this.x = pozCigli[i].x - this.width - 0.1;
                 }
                 else if (minOverlap == overlapRight) {
-                    // Hit from right
                     this.speed_x = this.speed_x *1.2;
-                    //this.x = pozCigli[i].x + 100 + 0.1;
                 }
                 else if (minOverlap == overlapTop) {
-                    // Hit from top
                     this.speed_y = this.speed_y *1.2;
-                    //this.y = pozCigli[i].y - this.height - 0.1;
                 }
                 else if (minOverlap == overlapBottom) {
-                    // Hit from bottom
                     this.speed_y = -this.speed_y *1.2;
-                    //this.y = pozCigli[i].y + 20 + 0.1;
                 }
 
                 myGameArea.context.clearRect(pozCigli[i].x, pozCigli[i].y, 100, 20);
@@ -208,7 +199,7 @@ function loptica(width, height, color, x, y, type) {
     }
 }
 
-function palica(width, height, color, x, y, type) {
+function palica(width, height, color, x, y, type) { // funkcija kojom se definira palica
     this.type = type;
     this.width = width;
     this.height = height;
@@ -216,13 +207,13 @@ function palica(width, height, color, x, y, type) {
     this.pomak_x = 0;
     this.x = x;
     this.y = y;
-    this.fetchX = function() {
+    this.fetchX = function() { // dohvat pozicije palice
         return this.x;
     }
-    this.fetchY = function(){
+    this.fetchY = function(){ // dohvat pozicije palice
         return this.y;
     }
-    this.update = function() {
+    this.update = function() { // azuriranje palice
         ctx = myGameArea.context;
         ctx.save();
         ctx.shadowBlur = 20;
@@ -231,7 +222,7 @@ function palica(width, height, color, x, y, type) {
         ctx.fillRect(this.x, this.y, this.width, this.height);
         ctx.restore();
     }
-    this.newPos = function(smjer) {
+    this.newPos = function(smjer) { // azuriranje pomaka palice
         if (smjer == 'lijevo')
             this.pomak_x = -5;
         else if (smjer == 'desno')
@@ -244,7 +235,7 @@ function palica(width, height, color, x, y, type) {
     }
 }
 
-function updateGameArea() {
+function updateGameArea() { // funkcija koja se kontinuirano izvrsava, omogucava neprekidno igranje igre
     myGameArea.clear();
     myGamePiece.newPos();
     myGamePiece.update();
